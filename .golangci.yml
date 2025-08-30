@@ -1,0 +1,8 @@
+linters-settings:
+  staticcheck:
+    checks:
+      - "-ST1000"
+
+linters:
+  disable:
+    - staticcheck
