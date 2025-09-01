@@ -195,15 +195,18 @@ func RequestFromReader(reader io.Reader) (*Request, error) {
 		}
 
 		bufLen += n
-		readN, err := request.parse(buf[:bufLen])
-		if err != nil {
-			return nil, err
+		readN, pErr := request.parse(buf[:bufLen])
+		if pErr != nil {
+			return nil, pErr
 		}
 
 		copy(buf, buf[readN:bufLen])
 		bufLen -= readN
 
 		if err == io.EOF {
+			if request.state != StateDone {
+				return nil, io.ErrUnexpectedEOF
+			}
 			break
 		}
 

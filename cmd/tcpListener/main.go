@@ -37,6 +37,9 @@ func main() {
 			fmt.Println("key:", k, "value:", v)
 		})
 
+		fmt.Println("Body:")
+		fmt.Print(req.Body)
+
 		conn.Close()
 	}
 }
