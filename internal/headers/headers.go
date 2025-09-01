@@ -53,15 +53,16 @@ func (h *Headers) Map(cb func(k, v string)) {
 	}
 }
 
-func (h *Headers) Get(name string) string {
-	return h.headers[strings.ToLower(name)]
+func (h *Headers) Get(name string) (string, bool) {
+	headers, ok := h.headers[strings.ToLower(name)]
+	return headers, ok
 }
 
 func (h *Headers) Set(name, value string) {
 	key := strings.ToLower(name)
 
-	exisitingValue := h.Get(key)
-	if exisitingValue != "" {
+	exisitingValue, exists := h.Get(key)
+	if exists {
 		h.headers[key] = strings.Join([]string{exisitingValue, value}, ",")
 		return
 	}

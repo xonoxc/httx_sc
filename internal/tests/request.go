@@ -5,7 +5,7 @@ import (
 	"bytes"
 	"errors"
 	"io"
-	"log/slog"
+	"strconv"
 
 	"tcp.scratch.i/internal/headers"
 )
@@ -22,26 +22,42 @@ const (
 
 type Request struct {
 	RequestLine RequestLine
-	Headers     headers.Headers
-	Body        []byte
+	Headers     *headers.Headers
+	Body        string
 	state       ParserState
+}
+
+func getInt(headers *headers.Headers, name string, defaultValue int) int {
+	valueStr, exits := headers.Get(name)
+	if !exits {
+		return defaultValue
+	}
+
+	value, err := strconv.Atoi(valueStr)
+	if err != nil {
+		return defaultValue
+	}
+
+	return value
 }
 
 func newRequest() *Request {
 	return &Request{
 		state:   StateInitialized,
-		Headers: *headers.NewHeaders(),
+		Headers: headers.NewHeaders(),
+		Body:    "",
 	}
 }
 
 func (r *Request) parse(b []byte) (int, error) {
 	read := 0
 
-outer:
+dance:
 	for {
 		currentData := b[read:]
-
-		slog.Info("parsing request", "state", r.state, "data", string(currentData))
+		if len(currentData) == 0 {
+			break dance
+		}
 
 		switch r.state {
 		case StateError:
@@ -55,7 +71,7 @@ outer:
 			}
 
 			if rl == nil && n == 0 {
-				break outer
+				break dance
 			}
 
 			r.RequestLine = *rl
@@ -70,24 +86,45 @@ outer:
 			}
 
 			if n == 0 {
-				break outer
+				break dance
 			}
 
 			read += n
 
 			if done {
-				r.state = StateBody
+				if r.hasBody() {
+					r.state = StateBody
+				} else {
+					r.state = StateDone
+				}
 			}
 
 		case StateBody:
-			r.state = StateDone
+			contentLen := getInt(r.Headers, "Content-Length", 0)
+
+			if contentLen == 0 {
+				panic("chunked not implemented")
+			}
+
+			remainingLen := min(contentLen-len(r.Body), len(currentData))
+			r.Body += string(currentData[:remainingLen])
+			read += remainingLen
+
+			if len(r.Body) == contentLen {
+				r.state = StateDone
+			}
 
 		case StateDone:
-			break outer
+			break dance
 		}
 	}
 
 	return read, nil
+}
+
+func (r *Request) hasBody() bool {
+	contentLen := getInt(r.Headers, "Content-Length", 0)
+	return contentLen > 0
 }
 
 func (r *Request) done() bool {

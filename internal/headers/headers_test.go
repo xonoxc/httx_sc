@@ -13,9 +13,16 @@ func TestHeaderParse(t *testing.T) {
 	n, done, err := headers.Parse(data)
 	require.NoError(t, err)
 	require.NotNil(t, headers)
-	assert.Equal(t, "localhost:42069", headers.Get("Host"))
-	assert.Equal(t, "cbababab", headers.Get("cocococ"))
-	assert.Equal(t, "", headers.Get("MissingKey"))
+
+	host, _ := headers.Get("Host")
+	assert.Equal(t, "localhost:42069", host)
+
+	cocococ, _ := headers.Get("cocococ")
+	assert.Equal(t, "cbababab", cocococ)
+
+	missingKey, _ := headers.Get("MissingKey")
+	assert.Equal(t, "", missingKey)
+
 	assert.Equal(t, 43, n)
 	assert.True(t, done)
 
@@ -24,7 +31,9 @@ func TestHeaderParse(t *testing.T) {
 	n, done, err = headers.Parse(data)
 	require.NoError(t, err)
 	require.NotNil(t, headers)
-	assert.Equal(t, "localhost:42069", headers.Get("Host"))
+
+	host, _ = headers.Get("Host")
+	assert.Equal(t, "localhost:42069", host)
 	assert.Equal(t, 26, n)
 	assert.True(t, done)
 
@@ -33,7 +42,9 @@ func TestHeaderParse(t *testing.T) {
 	n, done, err = headers.Parse(data)
 	require.NoError(t, err)
 	require.NotNil(t, headers)
-	assert.Equal(t, "localhost:42069", headers.Get("Host"))
+
+	host, _ = headers.Get("Host")
+	assert.Equal(t, "localhost:42069", host)
 	assert.Equal(t, 29, n)
 	assert.True(t, done)
 
@@ -42,7 +53,9 @@ func TestHeaderParse(t *testing.T) {
 	n, done, err = headers.Parse(data)
 	require.NoError(t, err)
 	require.NotNil(t, headers)
-	assert.Equal(t, "localhost:42069,localhost:3000", headers.Get("Host"))
+
+	host, _ = headers.Get("Host")
+	assert.Equal(t, "localhost:42069,localhost:3000", host)
 	assert.Equal(t, 47, n)
 	assert.True(t, done)
 
@@ -51,7 +64,9 @@ func TestHeaderParse(t *testing.T) {
 	n, done, err = headers.Parse(data)
 	require.NoError(t, err)
 	require.NotNil(t, headers)
-	assert.Equal(t, "localhost:42069,localhost:3000", headers.Get("Host"))
+
+	host, _ = headers.Get("Host")
+	assert.Equal(t, "localhost:42069,localhost:3000", host)
 	assert.Equal(t, 49, n)
 	assert.True(t, done)
 
@@ -60,7 +75,9 @@ func TestHeaderParse(t *testing.T) {
 	n, done, err = headers.Parse(data)
 	require.NoError(t, err)
 	require.NotNil(t, headers)
-	assert.Equal(t, "localhost:42069,localhost:3000", headers.Get("Host"))
+
+	host, _ = headers.Get("Host")
+	assert.Equal(t, "localhost:42069,localhost:3000", host)
 	assert.Equal(t, 50, n)
 	assert.True(t, done)
 
