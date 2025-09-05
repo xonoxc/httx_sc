@@ -58,6 +58,14 @@ func (h *Headers) Get(name string) (string, bool) {
 	return headers, ok
 }
 
+func (h *Headers) Replace(name, value string) {
+	h.headers[strings.ToLower(name)] = value
+}
+
+func (h *Headers) Delete(name string) {
+	delete(h.headers, strings.ToLower(name))
+}
+
 func (h *Headers) Set(name, value string) {
 	key := strings.ToLower(name)
 
@@ -66,6 +74,7 @@ func (h *Headers) Set(name, value string) {
 		h.headers[key] = strings.Join([]string{exisitingValue, value}, ",")
 		return
 	}
+
 	h.headers[key] = value
 }
 

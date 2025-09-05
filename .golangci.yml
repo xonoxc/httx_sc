@@ -6,3 +6,4 @@ linters-settings:
 linters:
   disable:
     - staticcheck
+    - revive

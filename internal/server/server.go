@@ -5,16 +5,35 @@ import (
 	"fmt"
 	"io"
 	"net"
+
+	"tcp.scratch.i/internal/response"
+	request "tcp.scratch.i/internal/tests"
 )
 
 type Server struct {
-	closed bool
+	closed  bool
+	handler Handler
 }
 
-func runRequest(conn io.ReadWriteCloser) {
-	out := []byte("HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\nContent-Length: 13\r\n\r\nHello World!")
-	conn.Write(out)
-	conn.Close()
+type HandlerError struct {
+	StatusCode response.StatusCode
+	Message    string
+}
+
+type Handler func(w response.Writer, req *request.Request)
+
+func runRequest(s *Server, conn io.ReadWriteCloser) {
+	defer conn.Close()
+
+	req, err := request.RequestFromReader(conn)
+
+	respWriter := response.NewWriter(conn)
+	if err != nil {
+		respWriter.WriteStatusLine(response.StatusBadRequest)
+		return
+	}
+
+	s.handler(*respWriter, req)
 }
 
 func runServer(s *Server, listener net.Listener) {
@@ -29,19 +48,21 @@ func runServer(s *Server, listener net.Listener) {
 				return
 			}
 
-			go runRequest(conn)
+			go runRequest(s, conn)
 		}
 	}()
 }
 
-func Serve(port uint16) (*Server, error) {
+func Serve(port uint16, handler Handler) (*Server, error) {
 	ln, err := net.Listen("tcp", fmt.Sprintf(":%d", port))
 	if err != nil {
 		return nil, err
 	}
-	defer ln.Close()
 
-	server := &Server{closed: false}
+	server := &Server{
+		closed:  false,
+		handler: handler,
+	}
 	go runServer(server, ln)
 
 	return server, err
