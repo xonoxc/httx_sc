@@ -18,48 +18,6 @@ import (
 
 const port = 8080
 
-func respond400() []byte {
-	return []byte(`
-		<html>
-		  <head>
-			<title>200 OK</title>
-		  </head>
-		  <body>
-			<h1>Success!</h1>
-			<p>Your request was an absolute banger.</p>
-		  </body>
-		</html>
-	`)
-}
-
-func respond200() []byte {
-	return []byte(`
-		 <html>
-		  <head>
-			<title>500 Internal Server Error</title>
-		  </head>
-		  <body>
-			<h1>Internal Server Error</h1>
-			<p>Okay, you know what? This one is on me.</p>
-		  </body>
-		</html>
-	`)
-}
-
-func respond500() []byte {
-	return []byte(`
-		 <html>
-		  <head>
-			<title>500 Internal Server Error</title>
-		  </head>
-		  <body>
-			<h1>Internal Server Error</h1>
-			<p>Okay, you know what? This one is on me.</p>
-		  </body>
-		</html>
-	`)
-}
-
 func toStr(payload []byte) string {
 	out := ""
 	for _, b := range payload {
@@ -71,16 +29,16 @@ func toStr(payload []byte) string {
 func main() {
 	s, err := server.Serve(port, func(w response.Writer, req *request.Request) {
 		h := response.GetDefaultHeaders(0)
-		body := respond200()
+		body := response.Respond200()
 		status := response.StatusOk
 
 		switch {
 		case req.RequestLine.RequestTarget == "/yourproblem":
-			body = respond400()
+			body = response.Respond400()
 			status = response.StatusBadRequest
 
 		case req.RequestLine.RequestTarget == "/myproblem":
-			body = respond500()
+			body = response.Respond500()
 			status = response.StatusInternalSeverError
 
 		case req.RequestLine.RequestTarget == "/video":
@@ -97,7 +55,7 @@ func main() {
 
 			res, err := http.Get("https://httpbin.org/" + requestTarget[len("/httpbin/"):])
 			if err != nil {
-				body = respond500()
+				body = response.Respond500()
 				status = response.StatusInternalSeverError
 
 				h.Replace("Content-Length", fmt.Sprintf("%d", len(body)))
@@ -108,7 +66,6 @@ func main() {
 				w.WriteBody(body)
 				return
 			} else {
-
 				w.WriteStatusLine(response.StatusOk)
 
 				h.Delete("Content-Length")

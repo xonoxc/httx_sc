@@ -85,3 +85,46 @@ func (w *Writer) WriteHeaders(h headers.Headers) error {
 func (w *Writer) WriteBody(p []byte) (int, error) {
 	return w.writer.Write(p)
 }
+
+// status Responses
+func Respond400() []byte {
+	return []byte(`
+		<html>
+		  <head>
+			<title>200 OK</title>
+		  </head>
+		  <body>
+			<h1>Success!</h1>
+			<p>Your request was an absolute banger.</p>
+		  </body>
+		</html>
+	`)
+}
+
+func Respond200() []byte {
+	return []byte(`
+		 <html>
+		  <head>
+			<title>500 Internal Server Error</title>
+		  </head>
+		  <body>
+			<h1>Internal Server Error</h1>
+			<p>Okay, you know what? This one is on me.</p>
+		  </body>
+		</html>
+	`)
+}
+
+func Respond500() []byte {
+	return []byte(`
+		 <html>
+		  <head>
+			<title>500 Internal Server Error</title>
+		  </head>
+		  <body>
+			<h1>Internal Server Error</h1>
+			<p>Okay, you know what? This one is on me.</p>
+		  </body>
+		</html>
+	`)
+}
